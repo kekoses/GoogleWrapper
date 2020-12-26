@@ -2,7 +2,7 @@
 
 namespace GoogeWrapperLibrary.Data.Models
 {
-    public class Sheet
+    public class SheetModel
     {
         public string Name { get; set; }
         public List<Cell> Cells { get; set; }

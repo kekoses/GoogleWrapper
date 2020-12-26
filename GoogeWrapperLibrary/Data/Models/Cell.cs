@@ -9,7 +9,7 @@ namespace GoogeWrapperLibrary.Data.Models
     public class Cell
     {
         public string Value { get; set; }
-
+        public string ColumnLetter { get; set; }
         public int RowIndex { get; set; }
         public int ColumnIndex { get; set; }
     }
