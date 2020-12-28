@@ -9,20 +9,16 @@ namespace GoogeWrapperLibrary.Data
     public static class UserInfo
     {
         public const string  outPath= "UserInfo.json";
-        public const string credentials = "credentials.json";
+        public const string credentials = "Wrapper-b6ea4c6d71a5.json";
+        public static string[] Scopes = { SheetsService.Scope.Spreadsheets };
         static UserInfo()
         {
            
             using (var readStream=new FileStream(credentials, FileMode.Open, FileAccess.Read))
             {
-                User = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(readStream).Secrets,
-                    new string[] { SheetsService.Scope.Spreadsheets },
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(outPath)).Result;  
+                User = GoogleCredential.FromStream(readStream).CreateScoped(Scopes);
             }
         }
-        public static UserCredential User { get; set; }
+        public static GoogleCredential User { get; set; }
     }
 }

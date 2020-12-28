@@ -73,10 +73,10 @@
     <Compile Include="Services\SheetService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="credentials.json">
+    <None Include="packages.config" />
+    <None Include="Wrapper-b6ea4c6d71a5.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

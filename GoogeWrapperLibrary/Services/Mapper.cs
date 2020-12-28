@@ -1,15 +1,17 @@
 ﻿using GoogeWrapperLibrary.Data.Models;
 using Google.Apis.Sheets.v4.Data;
+using System.Linq;
 
 namespace GoogeWrapperLibrary.Services
 {
     public static class Mapper
     {
+        private const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         public static Cell MapToCell(CellData data, int columnIndex, int rowIndex)
         {
-            return new Cell() { ColumnIndex = columnIndex, RowIndex = rowIndex, Value = data.FormattedValue };
+            return new Cell() { ColumnIndex = columnIndex, RowIndex = rowIndex, Value = data.FormattedValue, ColumnLetter=alphabet[columnIndex-1].ToString() };
         }
-        private const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        
         public static Row MapToRow(RowData rowData, int rowIndex)
         {
             var row = new Row();
@@ -18,10 +20,12 @@ namespace GoogeWrapperLibrary.Services
             for (int i = 0; i < rowData.Values.Count; i++)
             {
                 var cellDTO = MapToCell(rowData.Values[i], i + 1, rowIndex);
-                row.Cells.Add(cellDTO);
+                if (cellDTO.Value != null)
+                    row.Cells.Add(cellDTO);
+                else continue;
                 
             }
-            return row;
+            return row.Cells.Count > 0 ? row : null;
         }
         public static Column MapToColumn(int columnIndex)
         {
@@ -33,24 +37,20 @@ namespace GoogeWrapperLibrary.Services
         }
         public static Column FillColumn(SheetModel sheetDTO,Column column)
         {
-            int columnNumber = 0;
-            for (int i = 0; i < sheetDTO.Columns.Count; i++)
-            {
-                foreach (var row in sheetDTO.Rows)
-                {
-                    if (row.Cells.Count <= columnNumber )
-                        break;
-                    var cell = row.Cells[columnNumber];
-                    cell.ColumnLetter = column.Name;
-                    column.Cells.Add(cell);
-                }
-                columnNumber++;
-            }
+               foreach (var row in sheetDTO.Rows)
+               {
+                        var cell = row.Cells.FirstOrDefault(c => c.ColumnLetter == column.Name);
+                    if (cell != null)
+                    {
+                        column.Cells.Add(cell);
+                    }
+               }
             return column;
         }
-        public static SheetModel MapToSheetModel(Sheet sheet)
+        public static SheetModel MapToSheetModel(Sheet sheet, int sheetId)
         {
             var sheetDTO = new SheetModel();
+            sheetDTO.SheetId = sheetId;
             sheetDTO.Rows = new System.Collections.Generic.List<Row>();
             sheetDTO.Columns = new System.Collections.Generic.List<Column>();
             foreach (var gridData in sheet.Data)
@@ -67,7 +67,7 @@ namespace GoogeWrapperLibrary.Services
                     else continue;
                 }
                 var columnIndex = 1;
-                foreach (var colData in gridData.ColumnMetadata)
+                foreach (var elem in gridData.RowData[0].Values)
                 {
                     sheetDTO.Columns.Add(MapToColumn(columnIndex));
                     columnIndex++;
@@ -75,8 +75,8 @@ namespace GoogeWrapperLibrary.Services
                 for (int i = 0; i < sheetDTO.Columns.Count; i++)
                 {
                     var column = sheetDTO.Columns[i];
-                    sheetDTO.Columns.Remove(column);
                     var newColumn=FillColumn(sheetDTO,column);
+                    sheetDTO.Columns.Remove(column);
                     sheetDTO.Columns.Insert(i, newColumn);
                 }
                 
@@ -118,5 +118,6 @@ namespace GoogeWrapperLibrary.Services
             var cellData = new CellData() { FormattedValue = cellDTO.Value };
             return cellData;
         }
+        public static string GetColumnLetter(int columnIndex) => alphabet[columnIndex - 1].ToString();
     }
 }
