@@ -6,19 +6,9 @@ using System.Threading;
 
 namespace GoogeWrapperLibrary.Data
 {
-    public static class UserInfo
+    public class UserInfo
     {
-        public const string  outPath= "UserInfo.json";
-        public const string credentials = "Wrapper-b6ea4c6d71a5.json";
         public static string[] Scopes = { SheetsService.Scope.Spreadsheets };
-        static UserInfo()
-        {
-           
-            using (var readStream=new FileStream(credentials, FileMode.Open, FileAccess.Read))
-            {
-                User = GoogleCredential.FromStream(readStream).CreateScoped(Scopes);
-            }
-        }
-        public static GoogleCredential User { get; set; }
+        public GoogleCredential User { get; set; }
     }
 }

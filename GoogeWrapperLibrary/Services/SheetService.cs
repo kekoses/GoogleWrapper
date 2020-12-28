@@ -5,6 +5,7 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Microsoft.Win32;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace GoogeWrapperLibrary.Services
@@ -13,9 +14,9 @@ namespace GoogeWrapperLibrary.Services
     {
         private GoogleCredential _currentUser;
         private SheetsService _service;
-        public SheetService()
+        public SheetService(string credentialsDirectory)
         {
-            _currentUser = UserInfo.User;
+            _currentUser = GetCurrentUser(credentialsDirectory).User;
             _service = new SheetsService(new Google.Apis.Services.BaseClientService.Initializer()
             {
                 HttpClientInitializer = _currentUser
@@ -115,7 +116,6 @@ namespace GoogeWrapperLibrary.Services
             }
             else return null;
         }
-
         public Row PutRow(string sheetName, int rowIndex, Row rowValue)
         {
             var requestIds = sheetName.Split('/');
@@ -130,7 +130,6 @@ namespace GoogeWrapperLibrary.Services
                 return rowDTO;
             else return null;
         }
-
         public Column PutColumn(string sheetName, int columnIndex, Column colValue)
         {
             var requestIds = sheetName.Split('/');
@@ -145,7 +144,6 @@ namespace GoogeWrapperLibrary.Services
                 return column;
             else return null;
         }
-
         private SpreadsheetsResource.ValuesResource.UpdateRequest CreateUpdateRequest(object value, 
                                                                                       string spreadSheetIdd, 
                                                                                       string range,
@@ -169,6 +167,23 @@ namespace GoogeWrapperLibrary.Services
             var updateRequest = _service.Spreadsheets.Values.Update(valueRange, spreadSheetIdd, valueRange.Range);
             updateRequest.ValueInputOption = option;
             return updateRequest;
+        }
+        private UserInfo GetCurrentUser(string credentialsDirectory)
+        {
+            try
+            {
+                using (var stream = new FileStream(credentialsDirectory, FileMode.Open, FileAccess.Read))
+                {
+                    var userInfo = new UserInfo();
+                    userInfo.User = GoogleCredential.FromStream(stream).CreateScoped(UserInfo.Scopes);
+                    return userInfo;
+                }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return null;
+            }
+            
         }
     }
 }

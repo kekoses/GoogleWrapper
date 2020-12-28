@@ -14,7 +14,7 @@ namespace GoogleWrapper
         private static string exit = "exit";
         static void Main(string[] args)
         {
-              
+            _wrapper = new SheetWrapper();
             Console.WriteLine("Application is ready to work");
             while (true)
             {
@@ -24,15 +24,21 @@ namespace GoogleWrapper
                 {
                     if (requested[1] == "initialize")
                     {
-                        _wrapper = new SheetWrapper(requested[2]);
+                        _wrapper.GetSheet(requested[2]);
                         if (_wrapper.Sheet != null)
                         {
                             Console.WriteLine($"Sheet {_wrapper.Sheet.SheetId} was succesfully download\nSheet has {_wrapper.Sheet.Rows.Count} rows");
                         }
                         else
                         {
-                            Console.WriteLine("SpreadSheet doe not exist. Please, try anothe spreadsheet id for initialize.");
+                            Console.WriteLine("SpreadSheet does not exist or user credential was not setted to application. Please, try another spreadsheet id for initialize or set credentials by command 'set'[argument=credentials directory].");continue;
                         }
+                    }
+                    if(requested[1] == "set")
+                    {
+                        if(_wrapper.SetCredentialsDirectory(requested[2]))
+                            Console.WriteLine("Credentials was succesfully setted");
+                        else Console.WriteLine("Incorrectly directory, please make sure that path is actual or exists");
                     }
                     else
                     {

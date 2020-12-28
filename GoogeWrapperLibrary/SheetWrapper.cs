@@ -1,5 +1,6 @@
 ﻿using GoogeWrapperLibrary.Data.Models;
 using GoogeWrapperLibrary.Services;
+using Google.Apis.Sheets.v4.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,16 +12,6 @@ namespace GoogeWrapperLibrary
     public class SheetWrapper
     {
         SheetService _sheetService;
-        public SheetWrapper(string sheetName)
-        {
-            _sheetService = new SheetService();
-            Sheet = _sheetService.GetSheet(sheetName);
-            if (Sheet != null)
-            {
-                SpreadSheetId = sheetName;
-            }
-            else SpreadSheetId = null;
-        }
         public string SpreadSheetId { get; set; }
         public SheetModel Sheet { get; set; }
         public Cell GetCell(int rowIndex, int columnIndex) => _sheetService.GetCell($"{SpreadSheetId}/{Sheet.SheetId}", columnIndex, rowIndex);
@@ -32,5 +23,24 @@ namespace GoogeWrapperLibrary
         public Cell PutCell(int rowIndex, int columnIndex, Cell Value) => _sheetService.PutCell($"{SpreadSheetId}/{Sheet.SheetId}", rowIndex, columnIndex, Value);
         public Row PutRow(int rowIndex,  Row value) => _sheetService.PutRow($"{SpreadSheetId}/{Sheet.SheetId}", rowIndex, value);
         public Column PutColumn(int columnIndex, Column columnValue) => _sheetService.PutColumn($"{SpreadSheetId}/{Sheet.SheetId}", columnIndex, columnValue);
+        public void GetSheet(string sheetNameId)
+        {
+            if (_sheetService == null) return;
+            Sheet = _sheetService.GetSheet(sheetNameId);
+            if (Sheet != null)
+            {
+                SpreadSheetId = sheetNameId;
+            }
+            else SpreadSheetId = null;
+        }
+        public bool SetCredentialsDirectory(string credentialsDirectory)
+        {
+            if (!string.IsNullOrEmpty(credentialsDirectory))
+            {
+                _sheetService = new SheetService(credentialsDirectory);
+                return true;
+            }
+            else return false;
+        }
     }
 }
